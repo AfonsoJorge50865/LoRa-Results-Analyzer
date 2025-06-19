@@ -1,38 +1,238 @@
-.App {
-  text-align: center;
+/* Estilos globais */
+.lora-container {
+  width: 100%;
+  padding: 24px;
+  background-color: #f9fafb;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+.analyzer-card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+  padding: 24px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
+/* Títulos */
+.main-title {
+  font-size: 30px;
+  font-weight: bold;
+  color: #1f2937;
+  margin-bottom: 24px;
+}
+
+.section-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #374151;
+}
+
+/* Filtros */
+.filter-section {
+  margin-bottom: 24px;
+  padding: 16px;
+  background-color: #f3f4f6;
+  border-radius: 8px;
+}
+
+.filter-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 16px;
+}
+
+@media (min-width: 768px) {
+  .filter-grid {
+    grid-template-columns: repeat(4, 1fr);
   }
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.filter-control {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 6px;
+  font-size: 14px;
+}
+
+.filter-control:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #3b82f6;
+}
+
+/* Controles de visibilidade */
+.visibility-controls {
+  margin-bottom: 16px;
+  padding: 16px;
+  background-color: #eff6ff;
+  border-radius: 8px;
+}
+
+.visibility-header {
   display: flex;
-  flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
+  margin-bottom: 12px;
+}
+
+.visibility-buttons {
+  display: flex;
+  gap: 8px;
+}
+
+.visibility-grid {
+  display: grid;
+  grid-template-columns: repeat(1, 1fr);
+  gap: 8px;
+}
+
+@media (min-width: 768px) {
+  .visibility-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (min-width: 1024px) {
+  .visibility-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.config-button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  border-radius: 4px;
+  font-size: 14px;
+  transition: all 0.2s;
+  border: 2px solid;
+  cursor: pointer;
+  background-color: #f3f4f6;
+  border-color: #e5e7eb;
+}
+
+.config-button.active {
+  background-color: #dbeafe;
+  border-color: #93c5fd;
+}
+
+/* Botões */
+.button {
+  padding: 4px 12px;
+  border-radius: 4px;
+  font-size: 14px;
   color: white;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s;
 }
 
-.App-link {
-  color: #61dafb;
+.button-show-all {
+  background-color: #10b981;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.button-show-all:hover {
+  background-color: #059669;
+}
+
+.button-hide-all {
+  background-color: #ef4444;
+}
+
+.button-hide-all:hover {
+  background-color: #dc2626;
+}
+
+/* Gráfico */
+.chart-wrapper {
+  background-color: white;
+  padding: 16px;
+  border-radius: 4px;
+  border: 1px solid #e5e7eb;
+}
+
+.chart-title {
+  font-size: 20px;
+  font-weight: 600;
+  text-align: center;
+  margin-bottom: 16px;
+}
+
+/* Informações */
+.info-box {
+  margin-top: 24px;
+  padding: 16px;
+  background-color: #fffbeb;
+  border-radius: 8px;
+}
+
+.info-list {
+  font-size: 14px;
+  color: #4b5563;
+  list-style-type: none;
+  padding-left: 0;
+  line-height: 1.5;
+}
+
+.info-list li {
+  margin-bottom: 4px;
+}
+
+/* Ícones e elementos visuais */
+.icon {
+  width: 16px;
+  height: 16px;
+}
+
+.color-indicator {
+  width: 16px;
+  height: 16px;
+  border-radius: 4px;
+}
+
+.flex-center {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.label {
+  display: block;
+  font-size: 14px;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 4px;
+}
+
+/* Estilos específicos para os gráficos */
+.recharts-wrapper {
+  margin: 0 auto;
+}
+
+.recharts-surface {
+  overflow: visible;
+}
+
+.recharts-cartesian-grid line {
+  stroke: #e5e7eb;
+}
+
+.recharts-line {
+  stroke-width: 2px;
+}
+
+.recharts-dot {
+  r: 4px;
+}
+
+.recharts-legend-wrapper {
+  bottom: -20px !important;
+}
+
+.recharts-tooltip {
+  background-color: white !important;
+  border: 1px solid #e5e7eb !important;
+  border-radius: 4px !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1) !important;
+  padding: 8px !important;
 }
