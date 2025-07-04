@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from 'react';
-import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Filter, Eye, EyeOff } from 'lucide-react';
 import Papa from 'papaparse';
 
@@ -10,7 +10,7 @@ const LoRaAnalyzer = () => {
   const [selectedPL, setSelectedPL] = useState('all');
   const [activeChart, setActiveChart] = useState('rssi');
   const [visibleConfigs, setVisibleConfigs] = useState(new Set());
-  const [dataType, setDataType] = useState('nlos'); // 'nlos' or 'los'
+  const [dataType, setDataType] = useState('nlos');
   const [isLoading, setIsLoading] = useState(true);
 
   // Initialize empty data states
@@ -86,7 +86,7 @@ const LoRaAnalyzer = () => {
         groupedByDistance[item.distance] = { distance: item.distance };
       }
       
-      const configKey = `Config ${item.configId} (SF${item.sf}, PL${item.pl}, PE${item.pe})`;
+      const configKey = `SF${item.sf} PL${item.pl} PE${item.pe}`;
       
       if (activeChart === 'rssi') {
         groupedByDistance[item.distance][configKey] = item.rssi;
@@ -110,7 +110,7 @@ const LoRaAnalyzer = () => {
       if (selectedSF === 'all' || item.sf === parseInt(selectedSF)) {
         if (selectedPE === 'all' || item.pe === parseInt(selectedPE)) {
           if (selectedPL === 'all' || item.pl === parseInt(selectedPL)) {
-            configs.add(`Config ${item.configId} (SF${item.sf}, PL${item.pl}, PE${item.pe})`);
+            configs.add(`SF${item.sf} PL${item.pl} PE${item.pe}`);
           }
         }
       }
@@ -118,11 +118,11 @@ const LoRaAnalyzer = () => {
     return Array.from(configs);
   }, [activeRawData, selectedSF, selectedPE, selectedPL, isLoading]);
 
-  // Colors for the lines
+  // Improved color scheme
   const colors = [
-    '#8884d8', '#82ca9d', '#ffc658', '#ff7c7c', '#8dd1e1',
-    '#d084d0', '#ffb347', '#87ceeb', '#dda0dd', '#98fb98',
-    '#f0e68c', '#ff6347', '#40e0d0', '#ee82ee', '#90ee90'
+    '#3366cc', '#dc3912', '#ff9900', '#109618', '#990099',
+    '#0099c6', '#dd4477', '#66aa00', '#b82e2e', '#316395',
+    '#994499', '#22aa99', '#aaaa11', '#6633cc', '#e67300'
   ];
 
   // Toggle configuration visibility
@@ -141,178 +141,257 @@ const LoRaAnalyzer = () => {
   const hideAllConfigs = () => setVisibleConfigs(new Set());
 
   return (
-    <div className="lora-container">
-      <div className="analyzer-card">
-        <h1 className="main-title">Análise LoRa Performance - {dataType === 'nlos' ? 'NLOS' : 'LOS'}</h1>
+  <div className="lora-container">
+    <div className="analyzer-card">
+      <h1 className="main-title">Análise LoRa Performance - {dataType === 'nlos' ? 'NLOS' : 'LOS'}</h1>
+      
+      {/* Filtros */}
+      <div className="filter-section">
+        <div className="flex-center">
+          <Filter className="icon" />
+          <h2 className="section-title">Filtros</h2>
+        </div>
         
-        {/* Filtros */}
-        <div className="filter-section">
-          <div className="flex-center">
-            <Filter className="icon" />
-            <h2 className="section-title">Filtros</h2>
+        <div className="filter-grid">
+          {/* Seletor de tipo de ambiente */}
+          <div>
+            <label className="label">Tipo de Ambiente</label>
+            <select 
+              value={dataType} 
+              onChange={(e) => setDataType(e.target.value)}
+              className="filter-control"
+            >
+              <option value="nlos">NLOS (Non-Line-of-Sight)</option>
+              <option value="los">LOS (Line-of-Sight)</option>
+            </select>
           </div>
           
-          <div className="filter-grid">
-            {/* Seletor de tipo de ambiente */}
-            <div>
-              <label className="label">Tipo de Ambiente</label>
-              <select 
-                value={dataType} 
-                onChange={(e) => setDataType(e.target.value)}
-                className="filter-control"
-              >
-                <option value="nlos">NLOS (Non-Line-of-Sight)</option>
-                <option value="los">LOS (Line-of-Sight)</option>
-              </select>
-            </div>
-            
-            <div>
-              <label className="label">Spreading Factor</label>
-              <select 
-                value={selectedSF} 
-                onChange={(e) => setSelectedSF(e.target.value)}
-                className="filter-control"
-              >
-                <option value="all">Todos</option>
-                <option value="7">SF 7</option>
-                <option value="9">SF 9</option>
-                <option value="12">SF 12</option>
-              </select>
-            </div>
-            
-            <div>
-              <label className="label">Power Emission (dBm)</label>
-              <select 
-                value={selectedPE} 
-                onChange={(e) => setSelectedPE(e.target.value)}
-                className="filter-control"
-              >
-                <option value="all">Todos</option>
-                <option value="7">7 dBm</option>
-                <option value="10">10 dBm</option>
-                <option value="14">14 dBm</option>
-              </select>
-            </div>
-            
-            <div>
-              <label className="label">Payload (bytes)</label>
-              <select 
-                value={selectedPL} 
-                onChange={(e) => setSelectedPL(e.target.value)}
-                className="filter-control"
-              >
-                <option value="all">Todos</option>
-                <option value="30">30 bytes</option>
-                <option value="70">70 bytes</option>
-                <option value="110">110 bytes</option>
-              </select>
-            </div>
-            
-            <div>
-              <label className="label">Métrica</label>
-              <select 
-                value={activeChart} 
-                onChange={(e) => setActiveChart(e.target.value)}
-                className="filter-control"
-              >
-                <option value="rssi">RSSI (dBm)</option>
-                <option value="snr">SNR (dB)</option>
-                <option value="success_rate">Taxa de Sucesso (%)</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        {/* Controles de visibilidade */}
-        <div className="visibility-controls">
-          <div className="visibility-header">
-            <h3 className="section-title">Configurações Visíveis</h3>
-            <div className="visibility-buttons">
-              <button 
-                onClick={showAllConfigs}
-                className="button button-show-all"
-              >
-                Mostrar Todas
-              </button>
-              <button 
-                onClick={hideAllConfigs}
-                className="button button-hide-all"
-              >
-                Esconder Todas
-              </button>
-            </div>
+          <div>
+            <label className="label">Spreading Factor</label>
+            <select 
+              value={selectedSF} 
+              onChange={(e) => setSelectedSF(e.target.value)}
+              className="filter-control"
+            >
+              <option value="all">Todos</option>
+              <option value="7">SF 7</option>
+              <option value="9">SF 9</option>
+              <option value="12">SF 12</option>
+            </select>
           </div>
           
-          <div className="visibility-grid">
-            {uniqueConfigs.map((config, index) => (
-              <button
-                key={config}
-                onClick={() => toggleConfigVisibility(config)}
-                className={`config-button ${visibleConfigs.has(config) ? 'active' : ''}`}
-              >
-                {visibleConfigs.has(config) ? <Eye className="icon" /> : <EyeOff className="icon" />}
-                <div 
-                  className="color-indicator" 
-                  style={{ backgroundColor: colors[index % colors.length] }}
-                ></div>
-                <span>{config}</span>
-              </button>
-            ))}
+          <div>
+            <label className="label">Power Emission (dBm)</label>
+            <select 
+              value={selectedPE} 
+              onChange={(e) => setSelectedPE(e.target.value)}
+              className="filter-control"
+            >
+              <option value="all">Todos</option>
+              <option value="7">7 dBm</option>
+              <option value="10">10 dBm</option>
+              <option value="14">14 dBm</option>
+            </select>
+          </div>
+          
+          <div>
+            <label className="label">Payload (bytes)</label>
+            <select 
+              value={selectedPL} 
+              onChange={(e) => setSelectedPL(e.target.value)}
+              className="filter-control"
+            >
+              <option value="all">Todos</option>
+              <option value="30">30 bytes</option>
+              <option value="70">70 bytes</option>
+              <option value="110">110 bytes</option>
+            </select>
+          </div>
+          
+          <div>
+            <label className="label">Métrica</label>
+            <select 
+              value={activeChart} 
+              onChange={(e) => setActiveChart(e.target.value)}
+              className="filter-control"
+            >
+              <option value="rssi">RSSI (dBm)</option>
+              <option value="snr">SNR (dB)</option>
+              <option value="success_rate">Taxa de Sucesso (%)</option>
+            </select>
           </div>
         </div>
+      </div>
 
-        {/* Gráfico */}
-        <div className="chart-wrapper" style={{ height: '500px' }}>
+      {/* Gráfico */}
+      <div className="chart-wrapper" style={{ height: '500px' }}>
+        <div className="chart-header">
           <h3 className="chart-title">
             {activeChart === 'rssi' ? 'RSSI vs Distância' :
             activeChart === 'snr' ? 'SNR vs Distância' : 
             'Taxa de Sucesso vs Distância'}
           </h3>
           
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart 
-              data={processedData}
-              margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+          <div className="chart-legend">
+            {uniqueConfigs.map((config, index) => (
+              visibleConfigs.has(config) && (
+                <div key={config} className="legend-item">
+                  <div 
+                    className="legend-color" 
+                    style={{ backgroundColor: colors[index % colors.length] }}
+                  ></div>
+                  <span className="legend-label">{config}</span>
+                </div>
+              )
+            ))}
+          </div>
+        </div>
+        
+        <ResponsiveContainer width="100%" height="100%">
+          <LineChart 
+            data={processedData}
+            margin={{ top: 20, right: 30, left: 20, bottom: 60 }}
+          >
+            <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
+            <XAxis 
+              dataKey="distance"
+              label={{ value: 'Distância (m)', position: 'insideBottom', offset: -10 }}
+            />
+            <YAxis
+              label={{
+                value: activeChart === 'rssi' ? 'RSSI (dBm)' : 
+                      activeChart === 'snr' ? 'SNR (dB)' : 'Taxa de Sucesso (%)',
+                angle: -90,
+                position: 'insideLeft'
+              }}
+            />
+            <Tooltip
+              formatter={(value, name) => [
+                value !== null ? value.toFixed(2) : 'N/A',
+                name
+              ]}
+              labelFormatter={(label) => `Distância: ${label}m`}
+            />
+            
+            {uniqueConfigs.map((config, index) => (
+              visibleConfigs.has(config) && (
+                <Line
+                  key={config}
+                  type="monotone"
+                  dataKey={config}
+                  stroke={colors[index % colors.length]}
+                  strokeWidth={2}
+                  dot={{ r: 4 }}
+                  activeDot={{ r: 6 }}
+                  connectNulls={false}
+                />
+              )
+            ))}
+          </LineChart>
+        </ResponsiveContainer>
+      </div>
+
+      {/* Controles de visibilidade */}
+      <div className="visibility-controls">
+        <div className="visibility-header">
+          <h3 className="section-title">Configurações Visíveis</h3>
+          <div className="visibility-buttons">
+            <button 
+              onClick={showAllConfigs}
+              className="button button-show-all"
             >
-              <CartesianGrid strokeDasharray="3 3" stroke="#eee" />
-              <XAxis 
-                dataKey="distance"
-                label={{ value: 'Distância (m)', position: 'insideBottom', offset: -10 }}
-              />
-              <YAxis
-                label={{
-                  value: activeChart === 'rssi' ? 'RSSI (dBm)' : 
-                        activeChart === 'snr' ? 'SNR (dB)' : 'Taxa de Sucesso (%)',
-                  angle: -90,
-                  position: 'insideLeft'
-                }}
-              />
-              <Tooltip
-                formatter={(value) => [value !== null ? value.toFixed(2) : 'N/A']}
-                labelFormatter={(label) => `Distância: ${label}m`}
-              />
-              <Legend />
-              
-              {uniqueConfigs.map((config, index) => (
-                visibleConfigs.has(config) && (
-                  <Line
-                    key={config}
-                    type="monotone"
-                    dataKey={config}
-                    stroke={colors[index % colors.length]}
-                    strokeWidth={2}
-                    dot={{ r: 4 }}
-                    activeDot={{ r: 6 }}
-                    connectNulls={false}
-                  />
-                )
-              ))}
-            </LineChart>
-          </ResponsiveContainer>
+              Mostrar Todas
+            </button>
+            <button 
+              onClick={hideAllConfigs}
+              className="button button-hide-all"
+            >
+              Esconder Todas
+            </button>
+          </div>
+        </div>
+        
+        <div className="visibility-grid">
+          {uniqueConfigs.map((config, index) => (
+            <button
+              key={config}
+              onClick={() => toggleConfigVisibility(config)}
+              className={`config-button ${visibleConfigs.has(config) ? 'active' : ''}`}
+            >
+              {visibleConfigs.has(config) ? <Eye className="icon" /> : <EyeOff className="icon" />}
+              <div 
+                className="color-indicator" 
+                style={{ backgroundColor: colors[index % colors.length] }}
+              ></div>
+              <span>{config}</span>
+            </button>
+          ))}
         </div>
       </div>
     </div>
-  );
+
+    <style jsx>{`
+      .chart-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 15px;
+      }
+      
+      .chart-legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 10px;
+        max-width: 60%;
+        font-family: inherit;
+      }
+      
+      .legend-item {
+        display: flex;
+        align-items: center;
+        margin-right: 10px;
+      }
+      
+      .legend-color {
+        width: 14px;
+        height: 14px;
+        margin-right: 8px;
+        border-radius: 3px;
+      }
+      
+      .legend-label {
+        font-size: 14px;
+        font-weight: 500;
+        white-space: nowrap;
+        color: #333;
+        font-family: inherit;
+      }
+      
+      .chart-title {
+        font-size: 16px;
+        font-weight: 600;
+        margin: 0;
+      }
+      
+      @media (max-width: 768px) {
+        .chart-header {
+          flex-direction: column;
+          align-items: flex-start;
+        }
+        
+        .chart-legend {
+          max-width: 100%;
+          margin-top: 10px;
+          gap: 8px;
+        }
+        
+        .legend-label {
+          font-size: 13px;
+        }
+      }
+    `}</style>
+  </div>
+);
 };
 
 export default LoRaAnalyzer;
